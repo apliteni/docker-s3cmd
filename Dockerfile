@@ -1,11 +1,16 @@
-FROM alpine:3.7
+FROM alpine:latest
 
-ADD install.sh install.sh
-RUN sh install.sh && rm install.sh
+RUN apk add --no-cache python py-pip py-setuptools git ca-certificates
 
-ADD run.sh /opt/s3cmd/run.sh
-
+RUN pip install python-magic \
+  && git clone https://github.com/s3tools/s3cmd.git /tmp/s3cmd \
+  && cd /tmp/s3cmd \
+  && python /tmp/s3cmd/setup.py install \
+  && cd / \
+  && rm -rf /tmp/s3cmd \
+  && apk del py-pip git bash
 
 WORKDIR /s3
 
-ENTRYPOINT ["/opt/s3cmd/run.sh"]
+ENTRYPOINT ["s3cmd"]
+CMD ["--help"]
